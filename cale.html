@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Calendar</title>
+</head>
+<body>
+
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script>
+$(() => {
+
+    var holidays = {
+        '2020': [
+            '01-01', '01-02', '01-03', '01-06', '01-07', '02-24', '03-09', '05-01', '05-04', '05-05', '05-11', '06-12', '11-04'
+        ]
+    };
+
+    Date.prototype.getNormalMonth = function(){
+        let month = this.getMonth() + 1 + '';
+        if(month.length < 2) month = '0' + month;
+        return month;
+    };
+    Date.prototype.getNormalDate = function(){
+        let date = this.getDate() + '';
+        if(date.length < 2) date = '0' + date;
+        return date;
+    };
+    Date.prototype.getMonthName = function(){
+        const monthes = [
+            'january',
+            'february',
+            'march',
+            'april',
+            'may',
+            'june',
+            'july',
+            'august',
+            'september',
+            'october',
+            'november',
+            'december'
+        ];
+        return monthes[this.getMonth()];
+    };
+
+
+    $('form select').on('change', () => { $('form').trigger('submit'); });
+    $('form').on('submit', () => {
+        let $div = $('#year'),
+            $form = $('form'),
+            year = parseInt($form.find('[name=year]').val()),
+            nextYear = year + 1,
+            date = new Date(year, 0, 1),
+            week = -1, day = -1, row = 0,
+            html = '',
+            isNotThatYear, isSaturday, isSunday, isHoliday, isPast,
+            dayClass;
+
+        while(date.getDay() !== 1){
+            date.setDate(date.getDate() - 1);
+        }
+
+        while(date.getFullYear() !== nextYear || date.getDay() !== 1){
+            if(week === -1){
+                week = 1;
+                day = 1;
+                row = 1;
+                html += '<div class="row" data-row="' + row + '">\n' +
+                    '\t<div class="week" data-week="' + week + '">\n';
+            }
+            else {
+                day++;
+            }
+
+            isPast = date < (new Date());
+            isNotThatYear = !(date.getFullYear() === year);
+            isSaturday = date.getDay() === 6;
+            isSunday = date.getDay() === 0;
+            isHoliday = holidays[date.getFullYear()]
+                && holidays[date.getFullYear()].indexOf(date.getNormalMonth() + '-' + date.getNormalDate()) !== -1;
+
+            if(isPast || isNotThatYear || isSaturday || isSunday || isHoliday){
+                dayClass = [];
+                if(isPast) dayClass.push('isPast');
+                if(isNotThatYear) dayClass.push('isNotThatYear');
+                if(isSaturday) dayClass.push('isSaturday');
+                if(isSunday) dayClass.push('isSunday');
+                if(isHoliday) dayClass.push('isHoliday');
+                dayClass = ' ' + dayClass.join(' ');
+            }
+            else {
+                dayClass = '';
+            }
+
+            html += '\t\t<div class="day month' + date.getDate() + ' date' + date.getDate() + ' ' + dayClass + '"><span class="date">' + date.getDate() + '</span><span class="month">' + date.getMonthName() + '</span></div>\n';
+
+            if(!(day % 7)){
+                week++;
+                html += '</div>\n';
+                if((week % 4) === 1){
+                    row++;
+                    html += '</div>\n';
+                    if(date.getFullYear() !== nextYear){
+                        html += '\t<div class="row" data-row="' + row + '">\n';
+                    }
+                }
+                if(date.getFullYear() !== nextYear){
+                    html += '\t<div class="week" data-week="' + week + '">\n';
+                }
+            }
+            date.setDate(date.getDate() + 1);
+        }
+
+        $div.html(html);
+
+        return false;
+    });
+
+    $('form select').val('2020').trigger('change');
+});
+</script>
+
+<style>
+    #year {
+        overflow: hidden;
+    }
+
+    .row {
+        display: block;
+        width: 100%;
+        clear: both;
+    }
+
+    .week {
+        width: 25%;
+        float: left;
+    }
+
+    .day {
+        width: 13%;
+        float: left;
+        height: 32px;
+        border-top: solid 1px white;
+        border-right: solid 1px white;
+        border-bottom: solid 1px white;
+        border-left: solid 1px white;
+        background: #EEE;
+        font-family: Verdana;
+        font-size: 10px;
+    }
+
+    .date1 {
+        position: relative;
+    }
+
+    .date1 .month {
+        display: block;
+    }
+
+    .month {
+        display: none;
+        position: absolute;
+        z-index: 2;
+        opacity: 0.1;
+        font-size: 20px;
+        top: 7px;
+        left: 2px;
+    }
+
+    .isSunday, .isSaturday, .isHoliday {
+        background: #eed3d7;
+    }
+
+    .isPast {
+        opacity: 0.5;
+    }
+    .isNotThatYear {
+        opacity: 0.1;
+    }
+    .isPast.isNotThatYear {
+        opacity: 0.1;
+    }
+    .isPast .month {
+        opacity: 0.5;
+    }
+
+</style>
+
+<form>
+    <select name="year">
+        <option value=""> - выбери год - </option>
+        <option value="2019">2019</option>
+        <option value="2020">2020</option>
+        <option value="2021">2021</option>
+        <option value="2022">2022</option>
+    </select>
+
+    <button type="submit">Поехали</button>
+</form>
+
+<div style="page-break-before: always" id="year"></div>
+
+</body>
+</html>
