@@ -49,6 +49,7 @@ $(() => {
     $('form').on('submit', () => {
         let $div = $('#year'),
             $form = $('form'),
+            $h1 = $('h1'),
             year = parseInt($form.find('[name=year]').val()),
             nextYear = year + 1,
             date = new Date(year, 0, 1),
@@ -56,6 +57,8 @@ $(() => {
             html = '',
             isNotThatYear, isSaturday, isSunday, isHoliday, isPast,
             dayClass;
+
+        $h1.html(year);
 
         while(date.getDay() !== 1){
             date.setDate(date.getDate() - 1);
@@ -122,6 +125,23 @@ $(() => {
 </script>
 
 <style>
+    form {
+        display: block;
+        padding: 20px;
+    }
+
+    h1 {
+        text-align: center;
+        font-family: Verdana;
+        font-weight: normal;
+    }
+
+    @media print {
+        form {
+            display: none;
+        }
+    }
+
     #year {
         overflow: hidden;
     }
@@ -189,17 +209,20 @@ $(() => {
 
 <form>
     <select name="year">
-        <option value=""> - выбери год - </option>
+        <option value=""> - chose an year - </option>
         <option value="2019">2019</option>
         <option value="2020">2020</option>
         <option value="2021">2021</option>
         <option value="2022">2022</option>
     </select>
 
-    <button type="submit">Поехали</button>
+    <button type="submit">Submit</button>
+
+    <button onclick="window.print();">Print it</button>
 </form>
 
-<div style="page-break-before: always" id="year"></div>
+<h1></h1>
+<div id="year"></div>
 
 </body>
 </html>
